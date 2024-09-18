@@ -6,6 +6,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: test
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -31,38 +32,20 @@ jobs:
         run: npm ci
       - name: Build Android app
         run: eas build --platform android --profile preview --local --output ${{ github.workspace }}/app-release.apk
+
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-release
           path: ${{ github.workspace }}/app-release.apk
-      - name: Generate release tag
-        id: tag
+      - name: Install AWS CLI
         run: |
-          echo "::set-output name=release_tag::dev-$(date +'%Y.%m.%d-%H%M%S')"
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
+          sudo apt-get update
+          sudo apt-get install -y awscli
+      - name: Upload to Tebi S3
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.tag.outputs.release_tag }}
-          release_name: Development Build ${{ steps.tag.outputs.release_tag }}
-          draft: false
-          prerelease: true
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/app-release.apk
-          asset_name: app-release.apk
-          asset_content_type: application/vnd.android.package-archive
-      - name: Delete old releases
-        uses: dev-drprasad/delete-older-releases@v0.2.1
-        with:
-          keep_latest: 3
-          delete_tags: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: global
+        run: |
+          aws s3 cp ${{ github.workspace }}/app-release.apk s3://default-milo/prev-app.apk --endpoint-url https://s3.tebi.io
