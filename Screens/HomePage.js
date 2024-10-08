@@ -231,6 +231,13 @@ const HomePage = () => {
     });
   };
 
+  const handleScaleBt = async () => {
+    const scale = store.getState().settings.scaleAddress;
+    connectToDevice(scale);
+    console.log("Scale: ", scale);
+  };
+
+
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: "#F9F9F9" }}
@@ -276,17 +283,7 @@ const HomePage = () => {
           <Text style={styles.buttonText}>Start</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={() => {
-            const scale = store.getState().settings.scaleAddress;
-            if (!scale) {
-              ToastAndroid.show(
-                "Please go to settings to connect scale",
-                ToastAndroid.SHORT
-              ); // Showing a toast message if no scale address is available
-              return;
-            }
-            scale && connectToDevice(scale); // Connecting to the scale device
-          }}
+          onPress={handleScaleBt}
           style={[styles.button, styles.button_Bg, { marginTop: 30 }]}
         >
           <Text style={styles.buttonText}>Connect to Scale</Text>

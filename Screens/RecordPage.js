@@ -70,10 +70,12 @@ const RecordPage = ({ route, navigation }) => {
   const [scaleData, setScaleData] = useState({ reading: null, isStable: false });
 
   useEffect(() => {
+    console.log("Data",receivedData)
     if (receivedData) {
       const parsedData = parseBluetoothData(receivedData);
       if (JSON.stringify(parsedData) !== JSON.stringify(scaleData)) {
         setScaleData(parsedData);
+        console.log(scaleData);
       }
     }
   }, [receivedData]);

@@ -7,7 +7,6 @@
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "icon": "./assets/images/icon.png",
-
     "ios": {
       "supportsTablet": true
     },
@@ -40,7 +39,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "943fe02f-bcb4-4649-8ef7-7767fe7070a2"
+        "projectId": "c2d6c482-48e0-4504-8eb6-3202d159257c"
       }
     }
   }

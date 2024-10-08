@@ -58,6 +58,7 @@ const SettingsPage = () => {
       const connected = await connectToDevice(deviceAddress);
       if (deviceType === "scale") {
         dispatch(setScaleAddress(deviceAddress));
+        console.log(deviceAddress)
       } else if (deviceType === "printer") {
         dispatch(setPrinterAddress(deviceAddress));
       }
