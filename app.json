@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "FCS App",
-    "slug": "bt_test",
+    "name": "Rwanda Air App",
+    "slug": "rwanda_air",
     "version": "1.0.0",
     "orientation": "portrait",
     "scheme": "myapp",
@@ -11,7 +11,7 @@
       "supportsTablet": true
     },
     "android": {
-      "package": "com.milodevs.bt_example",
+      "package": "com.scalestech.rwanda_air",
       "permissions": [
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION",
@@ -37,9 +37,6 @@
     "extra": {
       "router": {
         "origin": false
-      },
-      "eas": {
-        "projectId": "c2d6c482-48e0-4504-8eb6-3202d159257c"
       }
     }
   }
