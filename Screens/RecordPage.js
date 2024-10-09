@@ -69,13 +69,27 @@ const RecordPage = ({ route, navigation }) => {
 
   const [scaleData, setScaleData] = useState({ reading: null, isStable: false });
 
+  // useEffect(() => {
+  //   console.log("Data",receivedData)
+  //   if (receivedData) {
+  //     const parsedData = parseBluetoothData(receivedData);
+  //     if (JSON.stringify(parsedData) !== JSON.stringify(scaleData)) {
+  //       setScaleData(parsedData);
+  //       console.log("scaledata:",scaleData);
+  //     }
+  //   }
+  // }, [receivedData]);
   useEffect(() => {
     console.log("Data",receivedData)
     if (receivedData) {
       const parsedData = parseBluetoothData(receivedData);
+
+      console.log("PARSED",parsedData);
+      
       if (JSON.stringify(parsedData) !== JSON.stringify(scaleData)) {
         setScaleData(parsedData);
-        console.log(scaleData);
+        console.log("PARSED",parsedData);
+        console.log("scaledata:",scaleData);
       }
     }
   }, [receivedData]);
@@ -167,35 +181,80 @@ const RecordPage = ({ route, navigation }) => {
 
     const parseBluetoothData = (data) => {
       // First, try to parse with the ST/US format
-      const regex = /(?:(US|ST),GS,)(\+\d+\.\d+kg)/g;
+      const regex = /(\w+),(\w+),(\W+)\s+(\d+\.\d+kg)/;
       let match;
       let lastReading = null;
       let isStable = false;
-    
-      while ((match = regex.exec(data)) !== null) {
-        const stability = match[1];
-        const reading = match[2];
-    
+      const str = data;
+      const result = regex.exec(str);
+
+      console.log("pData:", data)
+      console.log("match:", result);
+
+      while (result !== null) {
+        const stability = result[1];
+        const reading = result[4];//varries with scale
+
         lastReading = reading;
         isStable = (stability === 'ST');
-    
+        console.log("LP STABLE");
+
         // We've found a match, so we can return immediately
         return {
           reading: lastReading,
           isStable: isStable
         };
       }
+
+
+
     
       // If the first format doesn't match, try the base64 format
       try {
+        // const decodedData = atob(data);
+        // console.log("dData",decodedData)
+        // const match = decodedData.match(/(\d+(\.\d+)?)/);
+        // console.log("mData",match)
+        // if (match) {
+        
+        //   return {
+        //     reading: match[0] + 'kg',
+        //     isStable: true,
+            
+        //   };
+        // }
         const decodedData = atob(data);
-        const match = decodedData.match(/(\d+(\.\d+)?)/);
-        if (match) {
-          return {
-            reading: match[0] + 'kg',
-            isStable: true // Assuming 'D' is always stable
-          };
-        }
+console.log("dData", decodedData);
+
+// Define regex patterns for both formats
+const regexFormat1 = /(\w+),(\w+),(\W+)\s+(\d+\.\d+kg)/;  // Matches format like "ST,GS,+  0.25kg"
+const regexFormat2 = /-?\d+(\.\d+)?/;  // Matches format like "B  -0.33?"
+
+let match1 = decodedData.match(regexFormat1);
+let match2 = decodedData.match(regexFormat2);
+
+console.log("match1", match1);
+console.log("match2", match2);
+
+if (match1 && match1[0] && match1[4].includes('kg')) {
+  // Handle the first format: "ST,GS,+  0.25kg"
+  return {
+    reading: match1[4] + 'kg',
+    isStable: true,
+  };
+} else if (match2 && match2[0]) {
+  // Handle the second format: "B  -0.33?"
+  return {
+    reading: match2[0] + 'kg',
+    isStable: true,
+  };
+} else {
+  return {
+    reading: null,
+    isStable: false,
+  };
+}
+
       } catch (error) {
         console.error("Error decoding base64 data:", error);
       }
@@ -207,7 +266,51 @@ const RecordPage = ({ route, navigation }) => {
       };
     };
 
- 
+
+// const parseBluetoothData = (data) => {
+//   console.log("Received data:", data);
+
+//   let numericValue = null;
+
+//   // Try to extract a numeric value from the data
+//   if (typeof data === 'string') {
+//     // First, try to decode if it's base64 encoded
+//     try {
+//       const decodedData = atob(data);
+//       const match = decodedData.match(/-?\d+(\.\d+)?/);
+//       if (match) {
+//         numericValue = parseFloat(match[0]);
+//       }
+//     } catch (error) {
+//       // If decoding fails, it's not base64, so we'll try to extract numbers directly
+//       const match = data.match(/-?\d+(\.\d+)?/);
+//       if (match) {
+//         console.log("value",match)
+//         numericValue = parseFloat(match[0]);
+//       }
+//     }
+//   } else if (typeof data === 'number') {
+//     console.log("test",data);
+//     numericValue = data;
+//   }
+
+//   // If we found a valid numeric value, return it with 'kg' appended
+//   if (numericValue !== null) {
+//     console.log("Check1", numericValue)
+
+//     return {
+//       reading: numericValue.toFixed(2) + 'kg',
+//       isStable: true // Always set to true as per requirement
+//     };
+//   }
+
+//   // If no valid numeric value was found, return null reading
+//   return {
+//     reading: null,
+//     isStable: true // Always set to true as per requirement
+//   };
+// };
+  
 
   const handleSwitchBt = async () => {
     const printer = store.getState().settings.printerAddress;
@@ -366,11 +469,39 @@ const RecordPage = ({ route, navigation }) => {
     setBarterWeight("");
   };
 
-  useEffect(() => {
-    let encodedString = "AkQgIC0wLjMz9Q0=";
-let decodedString = atob(encodedString);
-console.log(decodedString);
-  }, [receivedData]);
+//   useEffect(() => {
+//     let encodedString = "AkQgIC0wLjMz9Q0=";
+// let decodedString = atob(encodedString);
+// console.log(decodedString);
+//  console.log("OCS ");
+//   }, [receivedData]);
+
+// useEffect(() => {
+//   if (receivedData) {
+//     // Check if the receivedData is a Base64 encoded string
+//     if (/^[A-Za-z0-9+/=]+$/.test(receivedData)) {
+//       try {
+//         let decodedString = atob(receivedData);
+//         console.log("Decoded Base64 string:", decodedString);
+//       } catch (error) {
+//         console.error("Error decoding Base64 string:", error);
+//       }
+//     } 
+//     // Check if the receivedData matches the format "XX,XX,+/-XX.XXxx" with possible spaces
+//     else if (/^[A-Z]{2},[A-Z]{2},[+-]\s*\d+(\.\d+)?[a-zA-Z]{2}$/.test(receivedData)) {
+//       try {
+//         const decodedFormat = decodeString(receivedData);
+//         console.log("Decoded formatted string:", decodedFormat);
+//       } catch (error) {
+//         console.error("Error decoding formatted string:", error);
+//       }
+//     } 
+//     else {
+//       console.log("Received data doesn't match any known format:", receivedData);
+//     }
+//   }
+// }, [receivedData]);
+
 
   return (
     <View style={styles.container}>
