@@ -3,13 +3,13 @@ import { getAnalytics } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCPR17aGX3r4tTfUWdC0N_HoemSJ2b9ewo",
-  authDomain: "fieldcollectionsystem-b8256.firebaseapp.com",
-  projectId: "fieldcollectionsystem-b8256",
-  storageBucket: "fieldcollectionsystem-b8256.appspot.com",
-  messagingSenderId: "1054702798515",
-  appId: "1:1054702798515:web:ddcf70b532c00d12d952c6",
-  measurementId: "G-FHX4H67E87"
+  apiKey: "AIzaSyDpAX3quNzJbYb5uIr3_2-BKqOKS7gkpaA",
+  authDomain: "rwanda-air.firebaseapp.com",
+  projectId: "rwanda-air",
+  storageBucket: "rwanda-air.appspot.com",
+  messagingSenderId: "833250541422",
+  appId: "1:833250541422:web:b1818dc5422aeae350cb7f",
+  measurementId: "G-QM91ELCZ5D"
 };
 
 // Initialize Firebase

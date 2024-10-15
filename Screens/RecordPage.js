@@ -28,14 +28,16 @@ import {
 import RNBluetooth from "react-native-bluetooth-classic";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
+import data from "../store/dummyData"; 
 
 const RecordPage = ({ route, navigation }) => {
-  const { location, product, productsData } = route.params;
+  const {category,productType, origin,destination} = route.params;
   const dispatch = useDispatch();
   const collections = useSelector((state) => state.settings.collections);
   const suppliers = useSelector((state) => state.settings.suppliers);
   const { BusinessId, user } = useSelector((state) => state.settings);
 
+  const [selectedProductType, setSelectedProductType] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [connectedDevice, setConnectedDevice] = useState(null);
   const [scaleStability, setScaleStability] = useState(null);
@@ -46,14 +48,11 @@ const RecordPage = ({ route, navigation }) => {
   const [totalQuantity, setTotalQuantity] = useState(0);
   const [totalWeight, setTotalWeight] = useState(0);
   const [totalPrice, setTotalPrice] = useState(0);
+  const [appData] = useState(data);
+  const [selectedCategory, setSelectedCategory] = useState(null);;
+  const [selectedOrigin, setSelectedOrigin] = useState(null);
+  const [selectedDestination, setSelectedDestination] = useState(null);
 
-  // Advancements state
-  const [advanceAmount, setAdvanceAmount] = useState("");
-  const [barterItem, setBarterItem] = useState(null);
-  const [barterWeight, setBarterWeight] = useState("");
-  const [advanceType, setAdvanceType] = useState("cash");
-  const [advancements, setAdvancements] = useState([]);
-  const [totalAdvanced, setTotalAdvanced] = useState(0);
 
   const bottomSheetModalRef = useRef(null);
 
@@ -96,87 +95,87 @@ const RecordPage = ({ route, navigation }) => {
 
 
 
-  const fieldCollectionData = useMemo(
-    () => ({
-      supplier: {
-        id: selectedSupplier?.value,
-        name: selectedSupplier?.label,
-      },
-      clerk: {
-        id: user?.clerkId,
-        name: `${user?.fName} ${user?.lName}`,
-      },
-      location: {
-        name: location?.label,
-        subLocation: "Sub-Location A",
-      },
-      product: {
-        price: product?.price,
-        name: product?.label,
-        id: product?.value,
-      },
-      timestamp: new Date().toISOString(),
-    }),
-    [selectedSupplier, user, location, product]
-  );
+  // const fieldCollectionData = useMemo(
+  //   () => ({
+  //     supplier: {
+  //       id: selectedSupplier?.value,
+  //       name: selectedSupplier?.label,
+  //     },
+  //     clerk: {
+  //       id: user?.clerkId,
+  //       name: `${user?.fName} ${user?.lName}`,
+  //     },
+  //     location: {
+  //       name: location?.label,
+  //       subLocation: "Sub-Location A",
+  //     },
+  //     product: {
+  //       price: product?.price,
+  //       name: product?.label,
+  //       id: product?.value,
+  //     },
+  //     timestamp: new Date().toISOString(),
+  //   }),
+  //   [selectedSupplier, user, location, product]
+  // );
 
-  useEffect(() => {
-    getSuppliers();
-  }, []);
+  // useEffect(() => {
+  //   getSuppliers();
+  // }, []);
 
-  useEffect(() => {
-    const newTotalQuantity = products.reduce(
-      (acc, item) => acc + parseInt(item.quantity),
-      0
-    );
-    const newTotalWeight = products.reduce(
-      (acc, item) => acc + parseFloat(item.weight),
-      0
-    );
-    const newTotalPrice = newTotalWeight * product.price;
-    setTotalQuantity(newTotalQuantity);
-    setTotalWeight(newTotalWeight.toFixed(2));
-    setTotalPrice(newTotalPrice.toFixed(2));
-  }, [products, product.price]);
+  // useEffect(() => {
+  //   const newTotalQuantity = products.reduce(
+  //     (acc, item) => acc + parseInt(item.quantity),
+  //     0
+  //   );
+  //   const newTotalWeight = products.reduce(
+  //     (acc, item) => acc + parseFloat(item.weight),
+  //     0
+  //   );
+  //   const newTotalPrice = newTotalWeight * product.price;
+  //   setTotalQuantity(newTotalQuantity);
+  //   setTotalWeight(newTotalWeight.toFixed(2));
+  //   setTotalPrice(newTotalPrice.toFixed(2));
+  // }, [products, product.price]);
 
-  useEffect(() => {
-    const newTotalAdvanced = advancements.reduce((sum, adv) => {
-      if (adv.type === "cash") {
-        return sum + parseFloat(adv.amount);
-      } else {
-        return sum + parseFloat(adv.item.price) * parseFloat(adv.weight);
-      }
-    }, 0);
-    setTotalAdvanced(newTotalAdvanced);
-  }, [advancements]);
+  // useEffect(() => {
+  //   const newTotalAdvanced = advancements.reduce((sum, adv) => {
+  //     if (adv.type === "cash") {
+  //       return sum + parseFloat(adv.amount);
+  //     } else {
+  //       return sum + parseFloat(adv.item.price) * parseFloat(adv.weight);
+  //     }
+  //   }, 0);
+  //   setTotalAdvanced(newTotalAdvanced);
+  // }, [advancements]);
 
-  const getSuppliers = async () => {
-    const suppliersCollection = collection(
-      db,
-      `Businesses/${BusinessId}/Suppliers`
-    );
-    const suppliersSnapshot = await getDocs(suppliersCollection);
-    const suppliersData = suppliersSnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-    dispatch(setSuppliers(suppliersData));
-  };
+  // const getSuppliers = async () => {
+  //   const suppliersCollection = collection(
+  //     db,
+  //     `Businesses/${BusinessId}/Suppliers`
+  //   );
+  //   const suppliersSnapshot = await getDocs(suppliersCollection);
+  //   const suppliersData = suppliersSnapshot.docs.map((doc) => ({
+  //     id: doc.id,
+  //     ...doc.data(),
+  //   }));
+  //   dispatch(setSuppliers(suppliersData));
+  // };
 
-  const onRefresh = React.useCallback(() => {
-    setRefreshing(true);
-    getSuppliers();
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 2000);
-  }, []);
+  // const onRefresh = React.useCallback(() => {
+  //   setRefreshing(true);
+  //   getSuppliers();
+  //   setTimeout(() => {
+  //     setRefreshing(false);
+  //   }, 2000);
+  // }, []);
 
-  const supplierData = suppliers
-    ? suppliers.map((supplier) => ({
-        label: supplier.fName,
-        value: supplier.id,
-      }))
-    : [];
+  // const supplierData = suppliers
+  //   ? suppliers.map((supplier) => ({
+  //       label: supplier.fName,
+  //       value: supplier.id,
+  //     }))
+  //   : [];
 
 
     const parseBluetoothData = (data) => {
@@ -184,7 +183,7 @@ const RecordPage = ({ route, navigation }) => {
       const regex = /(\w+),(\w+),(\W+)\s+(\d+\.\d+kg)/;
       let match;
       let lastReading = null;
-      let isStable = false;
+       let isStable = true;
       const str = data;
       const result = regex.exec(str);
 
@@ -236,24 +235,25 @@ let match2 = decodedData.match(regexFormat2);
 console.log("match1", match1);
 console.log("match2", match2);
 
-if (match1 && match1[0] && match1[4].includes('kg')) {
+if (match1 && match1[0] && match1[0].includes('kg')) {
   // Handle the first format: "ST,GS,+  0.25kg"
   return {
-    reading: match1[4] + 'kg',
-    isStable: true,
-  };
-} else if (match2 && match2[0]) {
-  // Handle the second format: "B  -0.33?"
-  return {
-    reading: match2[0] + 'kg',
-    isStable: true,
-  };
-} else {
-  return {
-    reading: null,
-    isStable: false,
-  };
-}
+    reading: match1[4]  ,
+    isStable:true,
+  };}
+// } else if (match2 && match2[0]) {
+//   // Handle the second format: "B  -0.33?"
+//   return {
+//     reading: match2[0] + 'kg',
+//     isStable: false,
+//   };
+// } 
+// else {
+//   return {
+//     reading: null,
+//     isStable: true,
+//   };
+// }
 
       } catch (error) {
         console.error("Error decoding base64 data:", error);
@@ -262,7 +262,7 @@ if (match1 && match1[0] && match1[4].includes('kg')) {
       // If neither format matches, return null
       return {
         reading: null,
-        isStable: false
+         isStable: false
       };
     };
 
@@ -317,6 +317,26 @@ if (match1 && match1[0] && match1[4].includes('kg')) {
     connectToDevice(printer);
     console.log("Printer: ", printer);
   };
+  const saveData = async () => {
+    console.log("test",category)
+    if ( category&& origin && destination && selectedProductType) {
+      try {
+        await addDoc(collection(db, "records"), {
+          category,
+          productType: selectedProductType.Name,
+          origin,
+          destination,
+          products,
+          createdAt: new Date(),
+        });
+        alert("Record saved successfully!");
+      } catch (error) {
+        alert("Error saving record: " + error.message);
+      }
+    } else {
+      alert("Please select all fields before saving.");
+    }
+  };
 
   const showPrinterReceipt = async () => {
     console.log(products);
@@ -354,29 +374,32 @@ if (match1 && match1[0] && match1[4].includes('kg')) {
     )
       .toFixed(2)
       .padStart(10)} ${parseFloat(totalPrice).toFixed(2).padStart()}\n\n`;
+    
+      // Function to save the data to Firebase
+  // Function to save the data to Firebase
 
-    receiptData += "--------- Advancements --------\n";
-    receiptData += "Type    Amount/Item   Weight(Kg)\n";
-    advancements.forEach((adv) => {
-      if (adv.type === "cash") {
-        receiptData += `Cash     ${parseFloat(adv.amount)
-          .toFixed(2)
-          .padStart(9)}      -\n`;
-      } else {
-        receiptData += `Barter   ${adv.item.label.padEnd(9)} ${parseFloat(
-          adv.weight
-        )
-          .toFixed(2)
-          .padStart(9)}\n`;
-      }
-    });
-    receiptData += "\n";
-    receiptData += `Total Advanced: Ksh ${parseFloat(totalAdvanced).toFixed(
-      2
-    )}\n`;
-    receiptData += `Net Pay: Ksh ${(
-      parseFloat(totalPrice) - parseFloat(totalAdvanced)
-    ).toFixed(2)}\n\n`;
+    // receiptData += "--------- Advancements --------\n";
+    // receiptData += "Type    Amount/Item   Weight(Kg)\n";
+    // advancements.forEach((adv) => {
+    //   if (adv.type === "cash") {
+    //     receiptData += `Cash     ${parseFloat(adv.amount)
+    //       .toFixed(2)
+    //       .padStart(9)}      -\n`;
+    //   } else {
+    //     receiptData += `Barter   ${adv.item.label.padEnd(9)} ${parseFloat(
+    //       adv.weight
+    //     )
+    //       .toFixed(2)
+    //       .padStart(9)}\n`;
+    //   }
+    // });
+    // receiptData += "\n";
+    // receiptData += `Total Advanced: Ksh ${parseFloat(totalAdvanced).toFixed(
+    //   2
+    // )}\n`;
+    // receiptData += `Net Pay: Ksh ${(
+    //   parseFloat(totalPrice) - parseFloat(totalAdvanced)
+    // ).toFixed(2)}\n\n`;
 
     receiptData += `Served by: ${server}\n\n`;
     receiptData += "Thank you for your business!\n";
@@ -390,84 +413,84 @@ if (match1 && match1[0] && match1[4].includes('kg')) {
     console.log("Receipt sent to the printer");
   };
 
-  const handleSaveRecord = async () => {
-    setLoading(true);
-    if (!location || !product || !selectedSupplier || products.length === 0) {
-      ToastAndroid.show("Please fill all required fields", ToastAndroid.SHORT);
-      setLoading(false);
-      return;
-    }
+  // const handleSaveRecord = async () => {
+  //   setLoading(true);
+  //   if (!location || !product || !selectedSupplier || products.length === 0) {
+  //     ToastAndroid.show("Please fill all required fields", ToastAndroid.SHORT);
+  //     setLoading(false);
+  //     return;
+  //   }
 
-    try {
-      const newRecord = {
-        ...fieldCollectionData,
-        products,
-        quantity: totalQuantity,
-        weight: totalWeight,
-        advancements,
-        totalAdvanced,
-        totalPrice: totalPrice,
-        remainingBalance: totalPrice - totalAdvanced,
-      };
+  //   try {
+  //     const newRecord = {
+  //       ...fieldCollectionData,
+  //       products,
+  //       quantity: totalQuantity,
+  //       weight: totalWeight,
+  //       advancements,
+  //       totalAdvanced,
+  //       totalPrice: totalPrice,
+  //       remainingBalance: totalPrice - totalAdvanced,
+  //     };
 
-      console.log("New Record:", newRecord);
+  //     console.log("New Record:", newRecord);
 
-      const networkState = await Network.getNetworkStateAsync();
-      if (networkState.isConnected) {
-        const fieldCollectionsRef = collection(
-          db,
-          `Businesses/${BusinessId}/FieldCollections`
-        );
-        const docRef = await addDoc(fieldCollectionsRef, newRecord);
-        console.log("Record saved successfully:", docRef.id);
-        ToastAndroid.show("Record saved successfully", ToastAndroid.SHORT);
-      } else {
-        dispatch(setCollections([...collections, newRecord]));
-        console.log("Record saved to Redux store");
-        ToastAndroid.show("Record saved to local storage", ToastAndroid.SHORT);
-      }
+  //     const networkState = await Network.getNetworkStateAsync();
+  //     if (networkState.isConnected) {
+  //       const fieldCollectionsRef = collection(
+  //         db,
+  //         `Businesses/${BusinessId}/FieldCollections`
+  //       );
+  //       const docRef = await addDoc(fieldCollectionsRef, newRecord);
+  //       console.log("Record saved successfully:", docRef.id);
+  //       ToastAndroid.show("Record saved successfully", ToastAndroid.SHORT);
+  //     } else {
+  //       dispatch(setCollections([...collections, newRecord]));
+  //       console.log("Record saved to Redux store");
+  //       ToastAndroid.show("Record saved to local storage", ToastAndroid.SHORT);
+  //     }
 
-      setModalVisible(true);
-      setLoading(false);
-    } catch (error) {
-      console.error("Error saving record:", error);
-      ToastAndroid.show(
-        "Error saving record. Please try again.",
-        ToastAndroid.SHORT
-      );
-      setLoading(false);
-    }
-  };
+  //     setModalVisible(true);
+  //     setLoading(false);
+  //   } catch (error) {
+  //     console.error("Error saving record:", error);
+  //     ToastAndroid.show(
+  //       "Error saving record. Please try again.",
+  //       ToastAndroid.SHORT
+  //     );
+  //     setLoading(false);
+  //   }
+  // };
 
-  const handleAdvancement = () => {
-    if (advanceType === "cash") {
-      if (isNaN(parseFloat(advanceAmount)) || parseFloat(advanceAmount) <= 0) {
-        ToastAndroid.show("Please enter a valid amount", ToastAndroid.SHORT);
-        return;
-      }
-      const newAdvance = { type: "cash", amount: parseFloat(advanceAmount) };
-      setAdvancements([...advancements, newAdvance]);
-    } else {
-      if (!barterItem) {
-        ToastAndroid.show(
-          "Please enter valid barter details",
-          ToastAndroid.SHORT
-        );
-        return;
-      }
-      const newAdvance = {
-        type: "barter",
-        item: barterItem,
-        weight: parseFloat(scaleData.reading || "0.00 Kg"),
-      };
-      setAdvancements([...advancements, newAdvance]);
-    }
+  // const handleAdvancement = () => {
+  //   if (advanceType === "cash") {
+  //     if (isNaN(parseFloat(advanceAmount)) || parseFloat(advanceAmount) <= 0) {
+  //       ToastAndroid.show("Please enter a valid amount", ToastAndroid.SHORT);
+  //       return;
+  //     }
+  //     const newAdvance = { type: "cash", amount: parseFloat(advanceAmount) };
+  //     setAdvancements([...advancements, newAdvance]);
+  //   } else {
+  //     if (!barterItem) {
+  //       ToastAndroid.show(
+  //         "Please enter valid barter details",
+  //         ToastAndroid.SHORT
+  //       );
+  //       return;
+  //     }
+  //     const newAdvance = {
+  //       type: "barter",
+  //       item: barterItem,
+  //       weight: parseFloat(scaleData.reading || "0.00 Kg"),
+  //     };
+  //     setAdvancements([...advancements, newAdvance]);
+  //   }
 
-    bottomSheetModalRef.current?.dismiss();
-    setAdvanceAmount("");
-    setBarterItem(null);
-    setBarterWeight("");
-  };
+  //   bottomSheetModalRef.current?.dismiss();
+  //   setAdvanceAmount("");
+  //   setBarterItem(null);
+  //   setBarterWeight("");
+  // };
 
 //   useEffect(() => {
 //     let encodedString = "AkQgIC0wLjMz9Q0=";
@@ -505,12 +528,12 @@ if (match1 && match1[0] && match1[4].includes('kg')) {
 
   return (
     <View style={styles.container}>
-      <Header refresh={refreshing} handleClick={onRefresh} />
+      <Header />
       <DropdownComponent
-        title="Suppliers"
-        onChange={setSelectedSupplier}
-        data={supplierData}
-      />
+            title={"Product Type"}
+            onChange={(value) => setSelectedProductType(value)}
+            data={appData.productType} 
+          />
 
       <Modal
         animationType="slide"
@@ -574,9 +597,9 @@ if (match1 && match1[0] && match1[4].includes('kg')) {
         onPress={() => {
           if (scaleData.reading) {
             setProducts([
-              ...products,
+              ...selectedProductType,
               {
-                ...product,
+                 ...selectedProductType,
                 quantity: 1,
                 weight: parseFloat(scaleData.reading),
               },
@@ -591,12 +614,12 @@ if (match1 && match1[0] && match1[4].includes('kg')) {
 
    
 
-      <TouchableOpacity
+      {/* <TouchableOpacity
         style={styles.button}
         onPress={() => bottomSheetModalRef.current?.present()}
       >
         <Text style={styles.textButton}>Add Advancement</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
 
       <View style={styles.preview}>
         <ScrollView style={styles.scroll}>
@@ -609,7 +632,7 @@ if (match1 && match1[0] && match1[4].includes('kg')) {
             </View>
             {products.map((item, index) => (
               <View style={styles.tableRow} key={index}>
-                <Text style={styles.tableCell}>{item.label}</Text>
+                {/* <Text style={styles.tableCell}>{item.product}</Text> */}
                 <Text style={styles.tableCell}>{item.quantity}</Text>
                 <Text style={styles.tableCell}>{item.weight}</Text>
               </View>
@@ -619,13 +642,9 @@ if (match1 && match1[0] && match1[4].includes('kg')) {
               <Text style={styles.tableCell}>{totalQuantity}</Text>
               <Text style={styles.tableCell}>{totalWeight}</Text>
             </View>
-            <Text style={styles.tableHeader}>Advancements</Text>
-            <View style={styles.tableRow}>
-              <Text style={styles.tableHeader}>Type</Text>
-              <Text style={styles.tableHeader}>Amount</Text>
-              <Text style={styles.tableHeader}>Price</Text>
-            </View>
-            {advancements.map((adv, index) => (
+            {/* <Text style={styles.tableHeader}>Advancements</Text> */}
+            
+            {/* {advancements.map((adv, index) => (
               <View style={styles.tableRow} key={index}>
                 <Text style={styles.tableCell}>
                   {adv.type === "cash" ? "Cash" : adv.item.label}
@@ -637,20 +656,20 @@ if (match1 && match1[0] && match1[4].includes('kg')) {
                   {adv.type === "cash" ? "" : adv.item.price}
                 </Text>
               </View>
-            ))}
+            ))} */}
 
-            <View style={styles.totalRow}>
+            {/* <View style={styles.totalRow}>
               <Text style={styles.tableCell}>Total</Text>
               <Text style={styles.tableCell}></Text>
               <Text style={styles.tableCell}>{totalAdvanced.toFixed(2)}</Text>
-            </View>
+            </View> */}
           </View>
         </ScrollView>
       </View>
 
       <TouchableOpacity
         style={[styles.button, { backgroundColor: loading ? "#ccc" : "green" }]}
-        onPress={handleSaveRecord}
+        onPress={saveData}
       >
         {loading ? (
           <ActivityIndicator color="#00FF00" />
@@ -661,85 +680,7 @@ if (match1 && match1[0] && match1[4].includes('kg')) {
         )}
       </TouchableOpacity>
 
-      <BottomSheetModal
-        ref={bottomSheetModalRef}
-        index={0}
-        snapPoints={["50%", "75%"]}
-      >
-        <View style={styles.bottomSheetContent}>
-          <Text style={styles.modalTitle}>Add Advancement</Text>
-
-          <View style={styles.advanceTypeSelection}>
-            <TouchableOpacity
-              style={[
-                styles.advanceTypeButton,
-                advanceType === "cash" && styles.selectedAdvanceType,
-              ]}
-              onPress={() => setAdvanceType("cash")}
-            >
-              <Text>Cash</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.advanceTypeButton,
-                advanceType === "barter" && styles.selectedAdvanceType,
-              ]}
-              onPress={() => setAdvanceType("barter")}
-            >
-              <Text>Dukawala (Barter)</Text>
-            </TouchableOpacity>
-          </View>
-
-          {advanceType === "cash" ? (
-            <TextInput
-              style={styles.input}
-              placeholder="Enter cash amount"
-              value={advanceAmount}
-              onChangeText={setAdvanceAmount}
-              keyboardType="numeric"
-            />
-          ) : (
-            <>
-              <DropdownComponent
-                title="Select item"
-                data={productsData}
-                onChange={setBarterItem}
-              />
-              <View style={styles.advanceTypeSelection}>
-                <Text
-                  style={{
-                    marginRight: 10,
-                    fontFamily: "Poppins-Regular",
-                    fontSize: 16,
-                  }}
-                >
-                  Weight:
-                </Text>
-                <Text
-                  style={{
-                    marginRight: 10,
-                    fontFamily: "Poppins-Regular",
-                    fontSize: 16,
-                  }}
-                >
-                  {receivedData &&
-                    parseFloat(
-                      receivedData
-                        .toString()
-                        .match(/[+-]?\d*\.?\d+/g)
-                        ?.join(", ")
-                    )}{" "}
-                  Kg
-                </Text>
-              </View>
-            </>
-          )}
-
-          <TouchableOpacity style={styles.button} onPress={handleAdvancement}>
-            <Text style={styles.advanceButtonText}>Add Advancement</Text>
-          </TouchableOpacity>
-        </View>
-      </BottomSheetModal>
+    
     </View>
   );
 };

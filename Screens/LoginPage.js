@@ -11,15 +11,23 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { setUser, setLoggedIn, setBusinessId } from "../store";
 import { db } from "../Database/config";
-import { collection, getDocs, query, where } from "firebase/firestore";
-import { store } from "../store/store";
+import {
+  collection,
+  getDocs,
+  addDoc
+} from "firebase/firestore";
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword
+} from "firebase/auth";
 import { useNavigation } from "@react-navigation/native";
 
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 
-const LoginPage = ({route, navigation}) => {
-  const [username, setUsername] = useState("");
+const LoginPage = () => {
+  const [email, setEmail] = useState(""); 
   const [password, setPassword] = useState("");
   const [ready, setReady] = useState(false);
   const { loggedIn } = useSelector((state) => state.settings);
@@ -27,11 +35,12 @@ const LoginPage = ({route, navigation}) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const dispatch = useDispatch();
+  const navigation = useNavigation();
 
   useEffect(() => {
-     console.log("loggedIn:", loggedIn);
-     console.log("isLoggedIn:", isLoggedIn);
-     setIsLoggedIn(loggedIn);
+    console.log("loggedIn:", loggedIn);
+    console.log("isLoggedIn:", isLoggedIn);
+    setIsLoggedIn(loggedIn);
 
     if (isLoggedIn) {
       setTimeout(() => {
@@ -40,51 +49,89 @@ const LoginPage = ({route, navigation}) => {
           routes: [{ name: "TabLayout" }],
         });
       }, 10);
-    }else{
+    } else {
       setReady(true);
     }
-  }, []);
+  }, [loggedIn, isLoggedIn]);
 
   const handleLogin = async () => {
-    setError("");
+    setError(""); 
     setLoading(true);
-    if (username.trim() === "" || password.trim() === "") {
-      setError("Please enter your username and password.");
+    const auth = getAuth(); 
+
+    if (email.trim() === "" || password.trim() === "") {
+      setError("Please enter your email and password.");
       setLoading(false);
       return;
     }
 
     try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user; 
+
       const businessCollections = await getDocs(collection(db, "Businesses"));
       let isValidLogin = false;
+
       for (const businessDoc of businessCollections.docs) {
-        const clerkCollection = await getDocs(
-          query(
-            collection(businessDoc.ref, "Clerks"),
-            where("fName", "==", username),
-            where("Id", "==", password)
-          )
-        );
-        if (!clerkCollection.empty) {
-          const clerkDoc = clerkCollection.docs[0];
-          const clerkData = {
-            clerkId: clerkDoc.id,
-            ...clerkDoc.data(),
-          };
-          dispatch(setBusinessId(businessDoc.id));
-          dispatch(setUser(clerkData));
-          dispatch(setLoggedIn(true));
-          navigation.navigate("TabLayout");
-          isValidLogin = true;
-          break;
+        const clerkCollection = await getDocs(collection(businessDoc.ref, "Clerks"));
+        for (const clerkDoc of clerkCollection.docs) {
+          const clerkData = clerkDoc.data();
+
+          if (clerkData.email === email) {
+            dispatch(setBusinessId(businessDoc.id));
+            dispatch(setUser({ clerkId: clerkDoc.id, ...clerkData }));
+            dispatch(setLoggedIn(true));
+
+            navigation.navigate("TabLayout");
+            isValidLogin = true;
+            break;
+          }
         }
+        if (isValidLogin) break;
       }
+
       if (!isValidLogin) {
-        setError("Invalid username or password.");
+        setError("Login failed. User not found in business records.");
       }
     } catch (error) {
-      console.error("Error fetching data: ", error);
-      setError("Failed to fetch data. Please try again.");
+      console.error("Error during login: ", error);
+      setError("Invalid email or password.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSignup = async () => {
+    const auth = getAuth();
+    setLoading(true);
+    setError(""); 
+
+    if (email.trim() === "" || password.trim() === "") {
+      setError("Please enter your email and password.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      await addDoc(collection(db, "Users"), {
+        uid: user.uid,
+        email: user.email,
+        createdAt: new Date(), 
+      });
+
+      console.log("User signed up successfully:", user);
+
+    
+      dispatch(setLoggedIn(true));
+
+      
+      navigation.navigate("TabLayout"); 
+    } catch (error) {
+      console.error("Error during signup: ", error);
+      setError(error.message); 
     } finally {
       setLoading(false);
     }
@@ -100,14 +147,14 @@ const LoginPage = ({route, navigation}) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Farm Scale</Text>
+      <Text style={styles.title}>RwandAir</Text>
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
       <TextInput
         style={styles.input}
-        placeholder="Username"
+        placeholder="Email"
         placeholderTextColor="#C4C4C4"
-        onChangeText={(text) => setUsername(text)}
-        value={username}
+        onChangeText={(text) => setEmail(text)} 
+        value={email}
       />
       <TextInput
         style={styles.input}
@@ -117,6 +164,14 @@ const LoginPage = ({route, navigation}) => {
         onChangeText={(text) => setPassword(text)}
         value={password}
       />
+      <TouchableOpacity style={styles.button} onPress={handleSignup}>
+        {loading ? (
+          <ActivityIndicator color="#00FF00" />
+        ) : (
+          <Text style={styles.buttonText}>Sign Up</Text>
+        )}
+      </TouchableOpacity>
+
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         {loading ? (
           <ActivityIndicator color="#00FF00" />
