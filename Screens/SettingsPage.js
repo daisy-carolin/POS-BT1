@@ -8,6 +8,7 @@ import {
   ScrollView,
   ToastAndroid,
   Modal,
+  Alert,
 } from "react-native";
 import { AntDesign, Octicons, Ionicons } from "@expo/vector-icons";
 import { useBluetooth } from "rn-bluetooth-classic";
@@ -77,13 +78,30 @@ const SettingsPage = () => {
   };
 
   const handleSignOut = () => {
-    dispatch(setLoggedIn(false));
-    dispatch(setUser(null));
-    navigation.reset({
-      index: 0,
-      routes: [{ name: "LoginPage" }],
-    });
-    ToastAndroid.show("Signed out", ToastAndroid.SHORT);
+    Alert.alert(
+      'Confirm Logout',
+      'Are you sure you want to log out?',
+      [
+        {
+          text: 'Cancel',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+        {
+          text: 'OK',
+          onPress: () => {
+            dispatch(setLoggedIn(false));
+            dispatch(setUser(null));
+            navigation.reset({
+              index: 0,
+              routes: [{ name: 'LoginPage' }],
+            });
+            ToastAndroid.show('Signed out', ToastAndroid.SHORT);
+          },
+        },
+      ],
+      { cancelable: false }
+    );
   };
 
   const startScan = async () => {

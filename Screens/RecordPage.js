@@ -10,6 +10,7 @@ import {
   TextInput,
   ActivityIndicator,
   ToastAndroid,
+  Alert,
 } from "react-native";
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import DropdownComponent from "../Components/DropDown";
@@ -20,7 +21,7 @@ import { addDoc, collection, getDocs } from "firebase/firestore";
 import { db } from "../Database/config";
 import { store } from "../store/store";
 import { useDispatch, useSelector } from "react-redux";
-import { setSuppliers, setCollections } from "../store";
+import { setSuppliers, setCollections, setLocations } from "../store";
 import {
   BottomSheetModal,
   BottomSheetModalProvider,
@@ -31,7 +32,7 @@ const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 import data from "../store/dummyData"; 
 
 const RecordPage = ({ route, navigation }) => {
-  const {category,productType, origin,destination} = route.params;
+  const {category, origin,destination} = route.params;
   const dispatch = useDispatch();
   const collections = useSelector((state) => state.settings.collections);
   const suppliers = useSelector((state) => state.settings.suppliers);
@@ -49,9 +50,6 @@ const RecordPage = ({ route, navigation }) => {
   const [totalWeight, setTotalWeight] = useState(0);
   const [totalPrice, setTotalPrice] = useState(0);
   const [appData] = useState(data);
-  const [selectedCategory, setSelectedCategory] = useState(null);;
-  const [selectedOrigin, setSelectedOrigin] = useState(null);
-  const [selectedDestination, setSelectedDestination] = useState(null);
 
 
   const bottomSheetModalRef = useRef(null);
@@ -123,20 +121,20 @@ const RecordPage = ({ route, navigation }) => {
   //   getSuppliers();
   // }, []);
 
-  // useEffect(() => {
-  //   const newTotalQuantity = products.reduce(
-  //     (acc, item) => acc + parseInt(item.quantity),
-  //     0
-  //   );
-  //   const newTotalWeight = products.reduce(
-  //     (acc, item) => acc + parseFloat(item.weight),
-  //     0
-  //   );
-  //   const newTotalPrice = newTotalWeight * product.price;
-  //   setTotalQuantity(newTotalQuantity);
-  //   setTotalWeight(newTotalWeight.toFixed(2));
-  //   setTotalPrice(newTotalPrice.toFixed(2));
-  // }, [products, product.price]);
+  useEffect(() => {
+    const newTotalQuantity = products.reduce(
+      (acc, item) => acc + parseInt(item.quantity),
+      0
+    );
+    const newTotalWeight = products.reduce(
+      (acc, item) => acc + parseFloat(item.weight),
+      0
+    );
+    // const newTotalPrice = newTotalWeight * product.price;
+    setTotalQuantity(newTotalQuantity);
+    setTotalWeight(newTotalWeight.toFixed(2));
+    // setTotalPrice(newTotalPrice.toFixed(2));
+  }, [products]);
 
   // useEffect(() => {
   //   const newTotalAdvanced = advancements.reduce((sum, adv) => {
@@ -178,69 +176,69 @@ const RecordPage = ({ route, navigation }) => {
   //   : [];
 
 
-    const parseBluetoothData = (data) => {
-      // First, try to parse with the ST/US format
-      const regex = /(\w+),(\w+),(\W+)\s+(\d+\.\d+kg)/;
-      let match;
-      let lastReading = null;
-       let isStable = true;
-      const str = data;
-      const result = regex.exec(str);
+//     const parseBluetoothData = (data) => {
+//       // First, try to parse with the ST/US format
+//       const regex = /(\w+),(\w+),(\W+)\s+(\d+\.\d+kg)/;
+//       let match;
+//       let lastReading = null;
+//        let isStable = true;
+//       const str = data;
+//       const result = regex.exec(str);
 
-      console.log("pData:", data)
-      console.log("match:", result);
+//       console.log("pData:", data)
+//       console.log("match:", result);
 
-      while (result !== null) {
-        const stability = result[1];
-        const reading = result[4];//varries with scale
+//       while (result !== null) {
+//         const stability = result[1];
+//         const reading = result[4];//varries with scale
 
-        lastReading = reading;
-        isStable = (stability === 'ST');
-        console.log("LP STABLE");
+//         lastReading = reading;
+//         isStable = (stability === 'ST');
+//         console.log("LP STABLE");
 
-        // We've found a match, so we can return immediately
-        return {
-          reading: lastReading,
-          isStable: isStable
-        };
-      }
+//         // We've found a match, so we can return immediately
+//         return {
+//           reading: lastReading,
+//           isStable: isStable
+//         };
+//       }
 
 
 
     
-      // If the first format doesn't match, try the base64 format
-      try {
-        // const decodedData = atob(data);
-        // console.log("dData",decodedData)
-        // const match = decodedData.match(/(\d+(\.\d+)?)/);
-        // console.log("mData",match)
-        // if (match) {
+//       // If the first format doesn't match, try the base64 format
+//       try {
+//         const decodedData = atob(data);
+//         console.log("dData",decodedData)
+//         const match = decodedData.match(/(\d+(\.\d+)?)/);
+//         console.log("mData",match)
+//         if (match) {
         
-        //   return {
-        //     reading: match[0] + 'kg',
-        //     isStable: true,
+//           return {
+//             reading: match[0] + 'kg',
+//             isStable: true,
             
-        //   };
-        // }
-        const decodedData = atob(data);
-console.log("dData", decodedData);
+//           };
+//         }
+//         const decodedData = atob(data);
+// console.log("dData", decodedData);
 
-// Define regex patterns for both formats
-const regexFormat1 = /(\w+),(\w+),(\W+)\s+(\d+\.\d+kg)/;  // Matches format like "ST,GS,+  0.25kg"
-const regexFormat2 = /-?\d+(\.\d+)?/;  // Matches format like "B  -0.33?"
+// // Define regex patterns for both formats
+// const regexFormat1 = /(\w+),(\w+),(\W+)\s+(\d+\.\d+kg)/;  // Matches format like "ST,GS,+  0.25kg"
+// const regexFormat2 = /-?\d+(\.\d+)?/;  // Matches format like "B  -0.33?"
 
-let match1 = decodedData.match(regexFormat1);
-let match2 = decodedData.match(regexFormat2);
+// let match1 = decodedData.match(regexFormat1);
+// let match2 = decodedData.match(regexFormat2);
 
-console.log("match1", match1);
-console.log("match2", match2);
+// console.log("match1", match1);
+// console.log("match2", match2);
 
-if (match1 && match1[0] && match1[0].includes('kg')) {
-  // Handle the first format: "ST,GS,+  0.25kg"
-  return {
-    reading: match1[4]  ,
-    isStable:true,
-  };}
+// if (match1 && match1[0] && match1[0].includes('kg')) {
+//   // Handle the first format: "ST,GS,+  0.25kg"
+//   return {
+//     reading: match1[4]  ,
+//     isStable:true,
+//   };}
 // } else if (match2 && match2[0]) {
 //   // Handle the second format: "B  -0.33?"
 //   return {
@@ -255,61 +253,61 @@ if (match1 && match1[0] && match1[0].includes('kg')) {
 //   };
 // }
 
-      } catch (error) {
-        console.error("Error decoding base64 data:", error);
-      }
+//       } catch (error) {
+//         console.error("Error decoding base64 data:", error);
+//       }
     
-      // If neither format matches, return null
-      return {
-        reading: null,
-         isStable: false
-      };
-    };
-
-
-// const parseBluetoothData = (data) => {
-//   console.log("Received data:", data);
-
-//   let numericValue = null;
-
-//   // Try to extract a numeric value from the data
-//   if (typeof data === 'string') {
-//     // First, try to decode if it's base64 encoded
-//     try {
-//       const decodedData = atob(data);
-//       const match = decodedData.match(/-?\d+(\.\d+)?/);
-//       if (match) {
-//         numericValue = parseFloat(match[0]);
-//       }
-//     } catch (error) {
-//       // If decoding fails, it's not base64, so we'll try to extract numbers directly
-//       const match = data.match(/-?\d+(\.\d+)?/);
-//       if (match) {
-//         console.log("value",match)
-//         numericValue = parseFloat(match[0]);
-//       }
-//     }
-//   } else if (typeof data === 'number') {
-//     console.log("test",data);
-//     numericValue = data;
-//   }
-
-//   // If we found a valid numeric value, return it with 'kg' appended
-//   if (numericValue !== null) {
-//     console.log("Check1", numericValue)
-
-//     return {
-//       reading: numericValue.toFixed(2) + 'kg',
-//       isStable: true // Always set to true as per requirement
+//       // If neither format matches, return null
+//       return {
+//         reading: null,
+//          isStable: false
+//       };
 //     };
-//   }
 
-//   // If no valid numeric value was found, return null reading
-//   return {
-//     reading: null,
-//     isStable: true // Always set to true as per requirement
-//   };
-// };
+
+const parseBluetoothData = (data) => {
+  console.log("Received data:", data);
+
+  let numericValue = null;
+
+  // Try to extract a numeric value from the data
+  if (typeof data === 'string') {
+    // First, try to decode if it's base64 encoded
+    try {
+      const decodedData = atob(data);
+      const match = decodedData.match(/-?\d+(\.\d+)?/);
+      if (match) {
+        numericValue = parseFloat(match[0]);
+      }
+    } catch (error) {
+      // If decoding fails, it's not base64, so we'll try to extract numbers directly
+      const match = data.match(/-?\d+(\.\d+)?/);
+      if (match) {
+        console.log("value",match)
+        numericValue = parseFloat(match[0]);
+      }
+    }
+  } else if (typeof data === 'number') {
+    console.log("test",data);
+    numericValue = data;
+  }
+
+  // If we found a valid numeric value, return it with 'kg' appended
+  if (numericValue !== null) {
+    console.log("Check1", numericValue)
+
+    return {
+      reading: numericValue.toFixed(2) + 'kg',
+      isStable: true // Always set to true as per requirement
+    };
+  }
+
+  // If no valid numeric value was found, return null reading
+  return {
+    reading: null,
+    isStable: true // Always set to true as per requirement
+  };
+};
   
 
   const handleSwitchBt = async () => {
@@ -317,101 +315,109 @@ if (match1 && match1[0] && match1[0].includes('kg')) {
     connectToDevice(printer);
     console.log("Printer: ", printer);
   };
+
+
   const saveData = async () => {
-    console.log("test",category)
-    if ( category&& origin && destination && selectedProductType) {
-      try {
-        await addDoc(collection(db, "records"), {
-          category,
-          productType: selectedProductType.Name,
-          origin,
-          destination,
-          products,
-          createdAt: new Date(),
-        });
-        alert("Record saved successfully!");
-      } catch (error) {
-        alert("Error saving record: " + error.message);
-      }
+    console.log("test", category);
+  
+    if (category && origin && destination && selectedProductType) {
+      Alert.alert(
+        "Confirm Save",
+        "Are you sure you want to save this record?",
+        [
+          {
+            text: "Cancel",
+            onPress: () => console.log("Save canceled"),
+            style: "cancel"
+          },
+          {
+            text: "Save",
+            onPress: async () => {
+              try {
+                await addDoc(collection(db, "records"), {
+                  selectedSupplier,
+                  category,
+                  // productType: selectedProductType.Name,
+                  origin,
+                  destination,
+                  products,
+                  createdAt: new Date(),
+                });
+                ToastAndroid.show("Record saved successfully!", ToastAndroid.LONG);
+
+                setModalVisible(true);
+                //Reset Data
+              } catch (error) {
+                alert("Error saving record: " + error.message);
+              }
+            }
+          }
+        ],
+        { cancelable: false }
+      );
     } else {
       alert("Please select all fields before saving.");
     }
   };
 
   const showPrinterReceipt = async () => {
-    console.log(products);
-    const supplier = fieldCollectionData.supplier.name;
-    const supplierID = fieldCollectionData.supplier.id;
-    const location = fieldCollectionData.location.name;
-    const sublocation = fieldCollectionData.location.subLocation;
-    const product = fieldCollectionData.product.name;
-    const items = products;
-    const server = fieldCollectionData.clerk.name;
-    const separator = "-----------------------------\n";
+    console.log("DDATA:",selectedSupplier);
+    try {
+        // Ensure these variables are defined
+        const supplier = selectedSupplier || "N/A";
+        const originLocation = origin || "Unknown";
+        const destinationLocation = destination || "Unknown";
+        const category = category || "N/A";
+        const items = products || [];
+        const separator = "-----------------------------\n";
 
-    let receiptData = "";
-    receiptData += "====== Weighing Receipt =====\n\n";
-    receiptData += `Supplier: ${supplier.padEnd(10)} ID: ${supplierID}\n`;
-    receiptData += `Location: ${location.padEnd(10)}\n`;
-    receiptData += `Date: ${new Date()
-      .toLocaleDateString()
-      .padEnd(9)} Time: ${new Date().toLocaleTimeString()}\n\n`;
+        // Initialize receipt data
+        let receiptData = "";
+        receiptData += "====== RWANDAIR RECIEPT =====\n\n";
+         receiptData += `Supplier Name: ${supplier.padEnd(10, ' ')}\n`;
+        receiptData += `Origin: ${originLocation.padEnd(10, ' ')}\n`;
+        receiptData += `Destination: ${destinationLocation.padEnd(10, ' ')}\n`;
+        receiptData += `Date:${new Date().toLocaleDateString().padEnd(9, ' ')} Time:${new Date().toLocaleTimeString()}\n\n`;
 
-    receiptData += "----------- Products -----------\n";
-    receiptData += "Product  Qty   Weight(Kg)  Price\n";
-    items.forEach((item) => {
-      const { label, quantity, weight, price } = item;
-      const qty = parseInt(quantity, 10);
-      const wgt = parseFloat(weight);
-      const prc = parseFloat(price);
-      receiptData += `${label.padEnd(8)} ${qty.toString().padStart(2)} ${wgt
-        .toFixed(2)
-        .padStart(9)} ${prc.toFixed(2).padStart(10)}\n`;
-    });
-    receiptData += separator;
-    receiptData += `Total:${totalQuantity.toString().padStart(6)} ${parseFloat(
-      totalWeight
-    )
-      .toFixed(2)
-      .padStart(10)} ${parseFloat(totalPrice).toFixed(2).padStart()}\n\n`;
-    
-      // Function to save the data to Firebase
-  // Function to save the data to Firebase
+        receiptData += "----------- Products -----------\n";
+        receiptData += "ProductName  Qty   Weight(Kg)  \n";
+        
+        let totalQuantity = 0;
+        let totalWeight = 0;
+        let totalPrice = 0;
 
-    // receiptData += "--------- Advancements --------\n";
-    // receiptData += "Type    Amount/Item   Weight(Kg)\n";
-    // advancements.forEach((adv) => {
-    //   if (adv.type === "cash") {
-    //     receiptData += `Cash     ${parseFloat(adv.amount)
-    //       .toFixed(2)
-    //       .padStart(9)}      -\n`;
-    //   } else {
-    //     receiptData += `Barter   ${adv.item.label.padEnd(9)} ${parseFloat(
-    //       adv.weight
-    //     )
-    //       .toFixed(2)
-    //       .padStart(9)}\n`;
-    //   }
-    // });
-    // receiptData += "\n";
-    // receiptData += `Total Advanced: Ksh ${parseFloat(totalAdvanced).toFixed(
-    //   2
-    // )}\n`;
-    // receiptData += `Net Pay: Ksh ${(
-    //   parseFloat(totalPrice) - parseFloat(totalAdvanced)
-    // ).toFixed(2)}\n\n`;
+        items.forEach((item) => {
+            const { label = item.productName || "Unknown", quantity = 0, weight = 0, price = 0 } = item;
+            // const pName = productName;
+            const qty = parseInt(quantity, 10);
+            const wgt = parseFloat(weight);
+            const prc = parseFloat(price);
 
-    receiptData += `Served by: ${server}\n\n`;
-    receiptData += "Thank you for your business!\n";
-    receiptData += "===========================\n";
-    receiptData += "\n\n\n"; // Extra lines for printer feed
+            totalQuantity += qty;
+            totalWeight += wgt;
+            totalPrice += prc;
 
-    console.log(receiptData); // For debugging
+            receiptData += `${label.padEnd(8, ' ')} ${qty.toString().padStart(2, ' ')} ${wgt.toFixed(2).padStart(9, ' ')}\n`;
+        });
 
-    const printer = store.getState().settings.printerAddress;
-    writeToDevice(printer, receiptData, "ascii");
-    console.log("Receipt sent to the printer");
-  };
+        receiptData += separator;
+        receiptData += `Total: ${totalQuantity.toString().padStart(6, ' ')} ${totalWeight.toFixed(2).padStart(10, ' ')} \n\n`;
+
+        receiptData += "Thank you for your business!\n";
+        receiptData += "===========================\n";
+        receiptData += "\n\n\n"; // Extra lines for printer feed
+
+        console.log(receiptData); // For debugging
+
+        const printer = store.getState().settings.printerAddress;
+        writeToDevice(printer, receiptData, "ascii");
+        console.log("Receipt sent to the printer");
+    } catch (error) {
+        console.error("Error generating the receipt:", error);
+    }
+};
+
+
 
   // const handleSaveRecord = async () => {
   //   setLoading(true);
@@ -530,10 +536,16 @@ if (match1 && match1[0] && match1[0].includes('kg')) {
     <View style={styles.container}>
       <Header />
       <DropdownComponent
-            title={"Product Type"}
-            onChange={(value) => setSelectedProductType(value)}
-            data={appData.productType} 
-          />
+        title={"Product Type"}
+        onChange={(value) => setSelectedProductType(value)}
+        data={appData.productType} 
+      />
+      <TextInput
+      value={selectedSupplier}
+      onChangeText={(text) => setSelectedSupplier(text)}
+      placeholder="Supplier"
+      style={styles.supplier}
+    />
 
       <Modal
         animationType="slide"
@@ -592,25 +604,27 @@ if (match1 && match1[0] && match1[0].includes('kg')) {
             </View>
           </View>
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => {
-          if (scaleData.reading) {
-            setProducts([
-              ...selectedProductType,
-              {
-                 ...selectedProductType,
-                quantity: 1,
-                weight: parseFloat(scaleData.reading),
-              },
-            ]);
-          } else {
-            ToastAndroid.show("No valid weight reading", ToastAndroid.SHORT);
-          }
-        }}
-      >
-        <Text style={styles.textButton}>Capture</Text>
-      </TouchableOpacity>
+          <TouchableOpacity
+          style={styles.button}
+          onPress={() => {
+            if (scaleData.reading) {
+              setProducts((prevProducts) => [
+                ...prevProducts,
+                {
+                  ...selectedProductType,
+                  quantity: 1,
+                  weight: parseFloat(scaleData.reading),
+                  productName: selectedProductType.Name
+                },
+              ]);
+            } else {
+              ToastAndroid.show("No valid weight reading", ToastAndroid.SHORT);
+            }
+          }}
+        >
+          <Text style={styles.textButton}>Capture</Text>
+        </TouchableOpacity>
+
 
    
 
@@ -632,7 +646,7 @@ if (match1 && match1[0] && match1[0].includes('kg')) {
             </View>
             {products.map((item, index) => (
               <View style={styles.tableRow} key={index}>
-                {/* <Text style={styles.tableCell}>{item.product}</Text> */}
+                <Text style={styles.tableCell}>{item.productName}</Text>
                 <Text style={styles.tableCell}>{item.quantity}</Text>
                 <Text style={styles.tableCell}>{item.weight}</Text>
               </View>
@@ -710,6 +724,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginTop: 22,
+  },
+  supplier:{
+    padding:10,
+    backgroundColor: "grey",
+    width: screenWidth * 0.8,
+    marginBottom: 5,
+    borderRadius: 20
   },
   modalView: {
     margin: 20,

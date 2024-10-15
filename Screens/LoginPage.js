@@ -7,10 +7,11 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  ToastAndroid,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { setUser, setLoggedIn, setBusinessId } from "../store";
-import { db } from "../Database/config";
+import { auth, db } from "../Database/config";
 import {
   collection,
   getDocs,
@@ -19,7 +20,8 @@ import {
 import {
   getAuth,
   signInWithEmailAndPassword,
-  createUserWithEmailAndPassword
+  createUserWithEmailAndPassword,
+  onAuthStateChanged
 } from "firebase/auth";
 import { useNavigation } from "@react-navigation/native";
 
@@ -36,70 +38,37 @@ const LoginPage = () => {
   const [error, setError] = useState("");
   const dispatch = useDispatch();
   const navigation = useNavigation();
+  const [user, setUser] = useState(null);
 
-  useEffect(() => {
-    console.log("loggedIn:", loggedIn);
-    console.log("isLoggedIn:", isLoggedIn);
-    setIsLoggedIn(loggedIn);
+ 
 
-    if (isLoggedIn) {
-      setTimeout(() => {
-        navigation.reset({
-          index: 0,
-          routes: [{ name: "TabLayout" }],
-        });
-      }, 10);
-    } else {
-      setReady(true);
-    }
-  }, [loggedIn, isLoggedIn]);
+    // Handle user state changes
+    useEffect(() => {
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        setUser(user);
+        if (user) {
+          // Navigate to 'TabLayout' only if there is a user
+          navigation.navigate('TabLayout');
+        } else {
+          // Optionally, navigate to a login screen if user is null
+          navigation.navigate('LoginPage'); // Replace with your login screen route
+        }
+      });
+    
+      // Cleanup subscription on unmount
+      return () => unsubscribe();
+    }, []);
 
   const handleLogin = async () => {
-    setError(""); 
-    setLoading(true);
-    const auth = getAuth(); 
-
-    if (email.trim() === "" || password.trim() === "") {
-      setError("Please enter your email and password.");
-      setLoading(false);
-      return;
-    }
-
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user; 
-
-      const businessCollections = await getDocs(collection(db, "Businesses"));
-      let isValidLogin = false;
-
-      for (const businessDoc of businessCollections.docs) {
-        const clerkCollection = await getDocs(collection(businessDoc.ref, "Clerks"));
-        for (const clerkDoc of clerkCollection.docs) {
-          const clerkData = clerkDoc.data();
-
-          if (clerkData.email === email) {
-            dispatch(setBusinessId(businessDoc.id));
-            dispatch(setUser({ clerkId: clerkDoc.id, ...clerkData }));
-            dispatch(setLoggedIn(true));
-
-            navigation.navigate("TabLayout");
-            isValidLogin = true;
-            break;
-          }
-        }
-        if (isValidLogin) break;
-      }
-
-      if (!isValidLogin) {
-        setError("Login failed. User not found in business records.");
-      }
-    } catch (error) {
-      console.error("Error during login: ", error);
-      setError("Invalid email or password.");
-    } finally {
-      setLoading(false);
+      await signInWithEmailAndPassword(auth, email, password);
+      navigation.navigate('TabLayout'); // Navigate to your desired screen after login
+      ToastAndroid.show("Welcome", ToastAndroid.LONG)
+    } catch (err) {
+      setError(err.message);
     }
   };
+
 
   const handleSignup = async () => {
     const auth = getAuth();
@@ -137,13 +106,13 @@ const LoginPage = () => {
     }
   };
 
-  if (!ready) {
-    return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" color="#00FF00" />
-      </View>
-    );
-  }
+  // if (!ready) {
+  //   return (
+  //     <View style={styles.container}>
+  //       <ActivityIndicator size="large" color="#00FF00" />
+  //     </View>
+  //   );
+  // }
 
   return (
     <View style={styles.container}>
@@ -164,13 +133,13 @@ const LoginPage = () => {
         onChangeText={(text) => setPassword(text)}
         value={password}
       />
-      <TouchableOpacity style={styles.button} onPress={handleSignup}>
+      {/* <TouchableOpacity style={styles.button} onPress={handleSignup}>
         {loading ? (
           <ActivityIndicator color="#00FF00" />
         ) : (
           <Text style={styles.buttonText}>Sign Up</Text>
         )}
-      </TouchableOpacity>
+      </TouchableOpacity> */}
 
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         {loading ? (
