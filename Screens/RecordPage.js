@@ -64,7 +64,7 @@ const RecordPage = ({ route, navigation }) => {
     readFromDevice,
   } = useBluetooth();
 
-  const [scaleData, setScaleData] = useState({ reading: null, isStable: false });
+  const [scaleData, setScaleData] = useState({ });
 
   // useEffect(() => {
   //   console.log("Data",receivedData)
@@ -77,20 +77,17 @@ const RecordPage = ({ route, navigation }) => {
   //   }
   // }, [receivedData]);
   useEffect(() => {
-    console.log("Data",receivedData)
     if (receivedData) {
       const parsedData = parseBluetoothData(receivedData);
-
-      console.log("PARSED",parsedData);
-      
-      if (JSON.stringify(parsedData) !== JSON.stringify(scaleData)) {
+  
+      // Ensure parsedData.reading is not null before proceeding
+      if (parsedData.reading !== null && JSON.stringify(parsedData) !== JSON.stringify(scaleData)) {
         setScaleData(parsedData);
-        console.log("PARSED",parsedData);
-        console.log("scaledata:",scaleData);
+        console.log("PARSED", parsedData);
+        console.log("scaledata:", scaleData);
       }
     }
   }, [receivedData]);
-
 
 
   // const fieldCollectionData = useMemo(
@@ -304,7 +301,7 @@ const parseBluetoothData = (data) => {
 
   // If no valid numeric value was found, return null reading
   return {
-    reading: null,
+     reading: null,
     isStable: true // Always set to true as per requirement
   };
 };
@@ -535,17 +532,18 @@ const parseBluetoothData = (data) => {
   return (
     <View style={styles.container}>
       <Header />
-      <DropdownComponent
-        title={"Product Type"}
-        onChange={(value) => setSelectedProductType(value)}
-        data={appData.productType} 
-      />
       <TextInput
       value={selectedSupplier}
       onChangeText={(text) => setSelectedSupplier(text)}
       placeholder="Supplier"
       style={styles.supplier}
     />
+      <DropdownComponent
+        title={"Product Type"}
+        onChange={(value) => setSelectedProductType(value)}
+        data={appData.productType} 
+      />
+      
 
       <Modal
         animationType="slide"
@@ -599,7 +597,7 @@ const parseBluetoothData = (data) => {
             </View>
             <View>
               <Text style={styles.textWeight}>
-                {scaleData.reading || "0.00 Kg"}
+                {scaleData.reading }
               </Text>
             </View>
           </View>

@@ -8,6 +8,7 @@ import SettingsPage from "../Screens/SettingsPage";
 import LoginPage from "../Screens/LoginPage";
 import { store } from "../store/store";
 import AdvancementsPage from "../Screens/AdvancementsPage";
+import DataPage from "../Screens/DataPage";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -22,6 +23,7 @@ export const TabLayout = () => {
       tabBar={(props) => <CustomTabBar {...props} />}
     >
       <Tab.Screen name="HomePage" component={HomePage} />
+      <Tab.Screen name="DataPage" component={DataPage} />
       <Tab.Screen name="SettingsPage" component={SettingsPage} />
     </Tab.Navigator>
   );
