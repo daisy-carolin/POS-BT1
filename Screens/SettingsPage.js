@@ -141,7 +141,7 @@ const SettingsPage = () => {
         }}
       >
         
-        <Text style={styles.dropdownText}>Select Scale</Text>
+  <Text style={styles.dropdownText}>Select Scale</Text>
         <Ionicons name="chevron-down" size={24} color="#333" />
       </TouchableOpacity>
 
@@ -194,7 +194,6 @@ const SettingsPage = () => {
     </View>
   );
 };
-
 
 // styles
 const styles = StyleSheet.create({

@@ -52,7 +52,7 @@ const RecordPage = ({ route, navigation }) => {
   const [appData] = useState(data);
 
 
-  const bottomSheetModalRef = useRef(null);
+const bottomSheetModalRef = useRef(null);
 
   const {
     devices,
@@ -65,17 +65,6 @@ const RecordPage = ({ route, navigation }) => {
   } = useBluetooth();
 
   const [scaleData, setScaleData] = useState({ });
-
-  // useEffect(() => {
-  //   console.log("Data",receivedData)
-  //   if (receivedData) {
-  //     const parsedData = parseBluetoothData(receivedData);
-  //     if (JSON.stringify(parsedData) !== JSON.stringify(scaleData)) {
-  //       setScaleData(parsedData);
-  //       console.log("scaledata:",scaleData);
-  //     }
-  //   }
-  // }, [receivedData]);
   useEffect(() => {
     if (receivedData) {
       const parsedData = parseBluetoothData(receivedData);
@@ -89,36 +78,7 @@ const RecordPage = ({ route, navigation }) => {
     }
   }, [receivedData]);
 
-
-  // const fieldCollectionData = useMemo(
-  //   () => ({
-  //     supplier: {
-  //       id: selectedSupplier?.value,
-  //       name: selectedSupplier?.label,
-  //     },
-  //     clerk: {
-  //       id: user?.clerkId,
-  //       name: `${user?.fName} ${user?.lName}`,
-  //     },
-  //     location: {
-  //       name: location?.label,
-  //       subLocation: "Sub-Location A",
-  //     },
-  //     product: {
-  //       price: product?.price,
-  //       name: product?.label,
-  //       id: product?.value,
-  //     },
-  //     timestamp: new Date().toISOString(),
-  //   }),
-  //   [selectedSupplier, user, location, product]
-  // );
-
-  // useEffect(() => {
-  //   getSuppliers();
-  // }, []);
-
-  useEffect(() => {
+useEffect(() => {
     const newTotalQuantity = products.reduce(
       (acc, item) => acc + parseInt(item.quantity),
       0
@@ -132,135 +92,6 @@ const RecordPage = ({ route, navigation }) => {
     setTotalWeight(newTotalWeight.toFixed(2));
     // setTotalPrice(newTotalPrice.toFixed(2));
   }, [products]);
-
-  // useEffect(() => {
-  //   const newTotalAdvanced = advancements.reduce((sum, adv) => {
-  //     if (adv.type === "cash") {
-  //       return sum + parseFloat(adv.amount);
-  //     } else {
-  //       return sum + parseFloat(adv.item.price) * parseFloat(adv.weight);
-  //     }
-  //   }, 0);
-  //   setTotalAdvanced(newTotalAdvanced);
-  // }, [advancements]);
-
-  // const getSuppliers = async () => {
-  //   const suppliersCollection = collection(
-  //     db,
-  //     `Businesses/${BusinessId}/Suppliers`
-  //   );
-  //   const suppliersSnapshot = await getDocs(suppliersCollection);
-  //   const suppliersData = suppliersSnapshot.docs.map((doc) => ({
-  //     id: doc.id,
-  //     ...doc.data(),
-  //   }));
-  //   dispatch(setSuppliers(suppliersData));
-  // };
-
-  // const onRefresh = React.useCallback(() => {
-  //   setRefreshing(true);
-  //   getSuppliers();
-  //   setTimeout(() => {
-  //     setRefreshing(false);
-  //   }, 2000);
-  // }, []);
-
-  // const supplierData = suppliers
-  //   ? suppliers.map((supplier) => ({
-  //       label: supplier.fName,
-  //       value: supplier.id,
-  //     }))
-  //   : [];
-
-
-//     const parseBluetoothData = (data) => {
-//       // First, try to parse with the ST/US format
-//       const regex = /(\w+),(\w+),(\W+)\s+(\d+\.\d+kg)/;
-//       let match;
-//       let lastReading = null;
-//        let isStable = true;
-//       const str = data;
-//       const result = regex.exec(str);
-
-//       console.log("pData:", data)
-//       console.log("match:", result);
-
-//       while (result !== null) {
-//         const stability = result[1];
-//         const reading = result[4];//varries with scale
-
-//         lastReading = reading;
-//         isStable = (stability === 'ST');
-//         console.log("LP STABLE");
-
-//         // We've found a match, so we can return immediately
-//         return {
-//           reading: lastReading,
-//           isStable: isStable
-//         };
-//       }
-
-
-
-    
-//       // If the first format doesn't match, try the base64 format
-//       try {
-//         const decodedData = atob(data);
-//         console.log("dData",decodedData)
-//         const match = decodedData.match(/(\d+(\.\d+)?)/);
-//         console.log("mData",match)
-//         if (match) {
-        
-//           return {
-//             reading: match[0] + 'kg',
-//             isStable: true,
-            
-//           };
-//         }
-//         const decodedData = atob(data);
-// console.log("dData", decodedData);
-
-// // Define regex patterns for both formats
-// const regexFormat1 = /(\w+),(\w+),(\W+)\s+(\d+\.\d+kg)/;  // Matches format like "ST,GS,+  0.25kg"
-// const regexFormat2 = /-?\d+(\.\d+)?/;  // Matches format like "B  -0.33?"
-
-// let match1 = decodedData.match(regexFormat1);
-// let match2 = decodedData.match(regexFormat2);
-
-// console.log("match1", match1);
-// console.log("match2", match2);
-
-// if (match1 && match1[0] && match1[0].includes('kg')) {
-//   // Handle the first format: "ST,GS,+  0.25kg"
-//   return {
-//     reading: match1[4]  ,
-//     isStable:true,
-//   };}
-// } else if (match2 && match2[0]) {
-//   // Handle the second format: "B  -0.33?"
-//   return {
-//     reading: match2[0] + 'kg',
-//     isStable: false,
-//   };
-// } 
-// else {
-//   return {
-//     reading: null,
-//     isStable: true,
-//   };
-// }
-
-//       } catch (error) {
-//         console.error("Error decoding base64 data:", error);
-//       }
-    
-//       // If neither format matches, return null
-//       return {
-//         reading: null,
-//          isStable: false
-//       };
-//     };
-
 
 const parseBluetoothData = (data) => {
   console.log("Received data:", data);
@@ -306,15 +137,13 @@ const parseBluetoothData = (data) => {
   };
 };
   
-
-  const handleSwitchBt = async () => {
+const handleSwitchBt = async () => {
     const printer = store.getState().settings.printerAddress;
     connectToDevice(printer);
     console.log("Printer: ", printer);
   };
 
-
-  const saveData = async () => {
+const saveData = async () => {
     console.log("test", category);
   
     if (category && origin && destination && selectedProductType) {
@@ -356,8 +185,7 @@ const parseBluetoothData = (data) => {
       alert("Please select all fields before saving.");
     }
   };
-
-  const showPrinterReceipt = async () => {
+const showPrinterReceipt = async () => {
     console.log("DDATA:",selectedSupplier);
     try {
         // Ensure these variables are defined
@@ -413,123 +241,7 @@ const parseBluetoothData = (data) => {
         console.error("Error generating the receipt:", error);
     }
 };
-
-
-
-  // const handleSaveRecord = async () => {
-  //   setLoading(true);
-  //   if (!location || !product || !selectedSupplier || products.length === 0) {
-  //     ToastAndroid.show("Please fill all required fields", ToastAndroid.SHORT);
-  //     setLoading(false);
-  //     return;
-  //   }
-
-  //   try {
-  //     const newRecord = {
-  //       ...fieldCollectionData,
-  //       products,
-  //       quantity: totalQuantity,
-  //       weight: totalWeight,
-  //       advancements,
-  //       totalAdvanced,
-  //       totalPrice: totalPrice,
-  //       remainingBalance: totalPrice - totalAdvanced,
-  //     };
-
-  //     console.log("New Record:", newRecord);
-
-  //     const networkState = await Network.getNetworkStateAsync();
-  //     if (networkState.isConnected) {
-  //       const fieldCollectionsRef = collection(
-  //         db,
-  //         `Businesses/${BusinessId}/FieldCollections`
-  //       );
-  //       const docRef = await addDoc(fieldCollectionsRef, newRecord);
-  //       console.log("Record saved successfully:", docRef.id);
-  //       ToastAndroid.show("Record saved successfully", ToastAndroid.SHORT);
-  //     } else {
-  //       dispatch(setCollections([...collections, newRecord]));
-  //       console.log("Record saved to Redux store");
-  //       ToastAndroid.show("Record saved to local storage", ToastAndroid.SHORT);
-  //     }
-
-  //     setModalVisible(true);
-  //     setLoading(false);
-  //   } catch (error) {
-  //     console.error("Error saving record:", error);
-  //     ToastAndroid.show(
-  //       "Error saving record. Please try again.",
-  //       ToastAndroid.SHORT
-  //     );
-  //     setLoading(false);
-  //   }
-  // };
-
-  // const handleAdvancement = () => {
-  //   if (advanceType === "cash") {
-  //     if (isNaN(parseFloat(advanceAmount)) || parseFloat(advanceAmount) <= 0) {
-  //       ToastAndroid.show("Please enter a valid amount", ToastAndroid.SHORT);
-  //       return;
-  //     }
-  //     const newAdvance = { type: "cash", amount: parseFloat(advanceAmount) };
-  //     setAdvancements([...advancements, newAdvance]);
-  //   } else {
-  //     if (!barterItem) {
-  //       ToastAndroid.show(
-  //         "Please enter valid barter details",
-  //         ToastAndroid.SHORT
-  //       );
-  //       return;
-  //     }
-  //     const newAdvance = {
-  //       type: "barter",
-  //       item: barterItem,
-  //       weight: parseFloat(scaleData.reading || "0.00 Kg"),
-  //     };
-  //     setAdvancements([...advancements, newAdvance]);
-  //   }
-
-  //   bottomSheetModalRef.current?.dismiss();
-  //   setAdvanceAmount("");
-  //   setBarterItem(null);
-  //   setBarterWeight("");
-  // };
-
-//   useEffect(() => {
-//     let encodedString = "AkQgIC0wLjMz9Q0=";
-// let decodedString = atob(encodedString);
-// console.log(decodedString);
-//  console.log("OCS ");
-//   }, [receivedData]);
-
-// useEffect(() => {
-//   if (receivedData) {
-//     // Check if the receivedData is a Base64 encoded string
-//     if (/^[A-Za-z0-9+/=]+$/.test(receivedData)) {
-//       try {
-//         let decodedString = atob(receivedData);
-//         console.log("Decoded Base64 string:", decodedString);
-//       } catch (error) {
-//         console.error("Error decoding Base64 string:", error);
-//       }
-//     } 
-//     // Check if the receivedData matches the format "XX,XX,+/-XX.XXxx" with possible spaces
-//     else if (/^[A-Z]{2},[A-Z]{2},[+-]\s*\d+(\.\d+)?[a-zA-Z]{2}$/.test(receivedData)) {
-//       try {
-//         const decodedFormat = decodeString(receivedData);
-//         console.log("Decoded formatted string:", decodedFormat);
-//       } catch (error) {
-//         console.error("Error decoding formatted string:", error);
-//       }
-//     } 
-//     else {
-//       console.log("Received data doesn't match any known format:", receivedData);
-//     }
-//   }
-// }, [receivedData]);
-
-
-  return (
+return (
     <View style={styles.container}>
       <Header />
       <TextInput
@@ -543,8 +255,6 @@ const parseBluetoothData = (data) => {
         onChange={(value) => setSelectedProductType(value)}
         data={appData.productType} 
       />
-      
-
       <Modal
         animationType="slide"
         transparent={true}
@@ -623,17 +333,7 @@ const parseBluetoothData = (data) => {
           <Text style={styles.textButton}>Capture</Text>
         </TouchableOpacity>
 
-
-   
-
-      {/* <TouchableOpacity
-        style={styles.button}
-        onPress={() => bottomSheetModalRef.current?.present()}
-      >
-        <Text style={styles.textButton}>Add Advancement</Text>
-      </TouchableOpacity> */}
-
-      <View style={styles.preview}>
+       <View style={styles.preview}>
         <ScrollView style={styles.scroll}>
           <View style={styles.table}>
             <Text style={styles.tableHeader}>Records</Text>
@@ -654,27 +354,7 @@ const parseBluetoothData = (data) => {
               <Text style={styles.tableCell}>{totalQuantity}</Text>
               <Text style={styles.tableCell}>{totalWeight}</Text>
             </View>
-            {/* <Text style={styles.tableHeader}>Advancements</Text> */}
             
-            {/* {advancements.map((adv, index) => (
-              <View style={styles.tableRow} key={index}>
-                <Text style={styles.tableCell}>
-                  {adv.type === "cash" ? "Cash" : adv.item.label}
-                </Text>
-                <Text style={styles.tableCell}>
-                  {adv.type === "cash" ? adv.amount : adv.weight}
-                </Text>
-                <Text style={styles.tableCell}>
-                  {adv.type === "cash" ? "" : adv.item.price}
-                </Text>
-              </View>
-            ))} */}
-
-            {/* <View style={styles.totalRow}>
-              <Text style={styles.tableCell}>Total</Text>
-              <Text style={styles.tableCell}></Text>
-              <Text style={styles.tableCell}>{totalAdvanced.toFixed(2)}</Text>
-            </View> */}
           </View>
         </ScrollView>
       </View>

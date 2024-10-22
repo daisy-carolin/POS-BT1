@@ -1,6 +1,4 @@
 import { configureStore, createSlice } from "@reduxjs/toolkit";
-
-
 // define the initial state
 export const initialState = {
     loggedIn: false,
@@ -59,7 +57,6 @@ const settingsSlice = createSlice({
     },
     
 });
-
 
 // export the actions
 export const { setScaleAddress, setPrinterAddress, setLoggedIn, setUser, setBusinessId, setSuppliers, setProducts, setLocations, setCollections, setCollectionRecords } = settingsSlice.actions;

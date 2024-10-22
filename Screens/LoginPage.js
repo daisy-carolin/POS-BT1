@@ -40,9 +40,7 @@ const LoginPage = () => {
   const navigation = useNavigation();
   const [user, setUser] = useState(null);
 
- 
-
-    // Handle user state changes
+ // Handle user state changes
     useEffect(() => {
       const unsubscribe = onAuthStateChanged(auth, (user) => {
         setUser(user);
@@ -69,8 +67,7 @@ const LoginPage = () => {
     }
   };
 
-
-  const handleSignup = async () => {
+const handleSignup = async () => {
     const auth = getAuth();
     setLoading(true);
     setError(""); 
@@ -105,16 +102,7 @@ const LoginPage = () => {
       setLoading(false);
     }
   };
-
-  // if (!ready) {
-  //   return (
-  //     <View style={styles.container}>
-  //       <ActivityIndicator size="large" color="#00FF00" />
-  //     </View>
-  //   );
-  // }
-
-  return (
+return (
     <View style={styles.container}>
       <Text style={styles.title}>RwandAir</Text>
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
@@ -133,14 +121,6 @@ const LoginPage = () => {
         onChangeText={(text) => setPassword(text)}
         value={password}
       />
-      {/* <TouchableOpacity style={styles.button} onPress={handleSignup}>
-        {loading ? (
-          <ActivityIndicator color="#00FF00" />
-        ) : (
-          <Text style={styles.buttonText}>Sign Up</Text>
-        )}
-      </TouchableOpacity> */}
-
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         {loading ? (
           <ActivityIndicator color="#00FF00" />
