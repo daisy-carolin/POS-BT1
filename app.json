@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Rwanda Air App",
-    "slug": "rwanda_air",
+    "name": "pos-bt",
+    "slug": "pos_bt",
     "version": "1.0.0",
     "orientation": "portrait",
     "scheme": "myapp",
@@ -37,9 +37,6 @@
     "extra": {
       "router": {
         "origin": false
-      },
-      "eas": {
-        "projectId": "e0c97f1a-8a26-4af9-b0fd-134ee47f6ebe"
       }
     }
   }
