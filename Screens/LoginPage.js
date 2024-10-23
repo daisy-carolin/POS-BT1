@@ -28,7 +28,9 @@ import { useNavigation } from "@react-navigation/native";
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 
-const LoginPage = () => {
+const LoginPage = ({route}) => {
+  
+  const { role } = route.params;
   const [email, setEmail] = useState(""); 
   const [password, setPassword] = useState("");
   const [ready, setReady] = useState(false);
@@ -104,7 +106,7 @@ const handleSignup = async () => {
   };
 return (
     <View style={styles.container}>
-      <Text style={styles.title}>RwandAir</Text>
+      <Text style={styles.title}>STS CloudPOS</Text>
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
       <TextInput
         style={styles.input}
