@@ -11,7 +11,7 @@
       "supportsTablet": true
     },
     "android": {
-      "package": "com.scalestech.rwanda_air",
+      "package": "com.valentinejerry.pos_bt",
       "permissions": [
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION",
@@ -37,6 +37,9 @@
     "extra": {
       "router": {
         "origin": false
+      },
+      "eas": {
+        "projectId": "987803d5-e3cc-4b38-a190-879462863b67"
       }
     }
   }

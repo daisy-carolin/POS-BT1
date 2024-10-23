@@ -9,6 +9,7 @@ import LoginPage from "../Screens/LoginPage";
 import { store } from "../store/store";
 import AdvancementsPage from "../Screens/AdvancementsPage";
 import DataPage from "../Screens/DataPage";
+import LandingPage from "../Screens/LandingPage";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -32,6 +33,11 @@ export const TabLayout = () => {
 export function MyStack() {
   return (
     <Stack.Navigator>
+      <Stack.Screen
+        name="LandingPage"
+        component={LandingPage}
+        options={{ headerShown: false }}
+      />
        <Stack.Screen
         name="LoginPage"
         component={LoginPage}
