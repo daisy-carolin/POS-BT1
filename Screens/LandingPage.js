@@ -1,22 +1,33 @@
-// LandingPage.js
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome'; // Change FontAwesome to any icon library you prefer
+import { View, Text, TouchableOpacity, StyleSheet, useWindowDimensions } from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 const LandingPage = ({ navigation }) => {
+  const { width } = useWindowDimensions();
+
   const handleNavigation = (role) => {
+    console.log(`Navigating to ${role} Login Page`);
     navigation.navigate('LoginPage', { role });
   };
 
+  const isLargeScreen = width > 768;
+
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.card} onPress={() => handleNavigation('admin')}>
-        <Icon name="user-secret" size={150} color="#0F084B" />
-        <Text style={styles.cardText}>Admin</Text>
+      <TouchableOpacity
+        style={[styles.card, isLargeScreen ? styles.largeCard : styles.smallCard]}
+        onPress={() => handleNavigation('admin')}
+      >
+        <Icon name="user-secret" size={isLargeScreen ? 150 : 80} color="#0F084B" />
+        <Text style={isLargeScreen ? styles.largeCardText : styles.smallCardText}>Admin</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.card} onPress={() => handleNavigation('user')}>
-        <Icon name="user" size={150} color="#0F084B" />
-        <Text style={styles.cardText}>User</Text>
+
+      <TouchableOpacity
+        style={[styles.card, isLargeScreen ? styles.largeCard : styles.smallCard]}
+        onPress={() => handleNavigation('user')}
+      >
+        <Icon name="user" size={isLargeScreen ? 150 : 80} color="#0F084B" />
+        <Text style={isLargeScreen ? styles.largeCardText : styles.smallCardText}>User</Text>
       </TouchableOpacity>
     </View>
   );
@@ -27,27 +38,39 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    flexDirection: 'row', // Align items in a row
+    padding: 20,
   },
   card: {
     backgroundColor: '#fff',
-    padding: 20,
-    margin: 10,
+    padding: 20, 
+    margin: 20,
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 3, // Add shadow for Android
-    shadowColor: '#000', // Add shadow for iOS
+    elevation: 3,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
-    width: 400,
-    height: 400
+    zIndex: 10, // Ensuring the card is clickable
   },
-  cardText: {
+  largeCard: {
+    width: 300,
+    height: 300,
+  },
+  smallCard: {
+    width: 150,
+    height: 150,
+  },
+  largeCardText: {
     marginTop: 10,
     fontSize: 36,
-    fontWeight: 'semibold',
+    fontWeight: 'bold',
+  },
+  smallCardText: {
+    marginTop: 10,
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });
 

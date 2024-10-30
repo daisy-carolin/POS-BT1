@@ -15,7 +15,7 @@ import DropdownComponent from "../Components/DropDown";
 import { Button } from "react-native-paper";
 import Header from "../Components/Header";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { useBluetooth } from "rn-bluetooth-classic";
+import { useBluetooth }  from "rn-bluetooth-classic";
 import { addDoc, collection, doc, getDocs } from "firebase/firestore";
 import { db } from "../Database/config";
 import { store } from "../store/store";

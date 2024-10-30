@@ -1,135 +1,121 @@
-import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  Dimensions,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-  ToastAndroid,
-} from "react-native";
-import { useDispatch, useSelector } from "react-redux";
-import { setUser, setLoggedIn, setBusinessId } from "../store";
-import { auth, db } from "../Database/config";
-import {
-  collection,
-  getDocs,
-  addDoc
-} from "firebase/firestore";
-import {
-  getAuth,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  onAuthStateChanged
-} from "firebase/auth";
-import { useNavigation } from "@react-navigation/native";
+import React, { useState } from 'react';
+import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity } from 'react-native';
+import { auth } from '../Database/config'; // Ensure Firebase auth is correctly imported
+import { signInWithEmailAndPassword } from 'firebase/auth';
 
-const screenWidth = Dimensions.get("window").width;
-const screenHeight = Dimensions.get("window").height;
+const LoginPage = ({ route, navigation }) => {
+  const { role } = route.params || { role: 'user' }; // Defaults to 'user' if not passed
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [idNumber, setIdNumber] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
-const LoginPage = ({route}) => {
-  
-  const { role } = route.params;
-  const [email, setEmail] = useState(""); 
-  const [password, setPassword] = useState("");
-  const [ready, setReady] = useState(false);
-  const { loggedIn } = useSelector((state) => state.settings);
-  const [isLoggedIn, setIsLoggedIn] = useState(loggedIn);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const dispatch = useDispatch();
-  const navigation = useNavigation();
-  const [user, setUser] = useState(null);
+  // Helper function to reset error messages
+  const resetError = () => setErrorMessage('');
 
- // Handle user state changes
-    useEffect(() => {
-      const unsubscribe = onAuthStateChanged(auth, (user) => {
-        setUser(user);
-        if (user) {
-          // Navigate to 'TabLayout' only if there is a user
-          navigation.navigate('TabLayout');
-        } else {
-          // Optionally, navigate to a login screen if user is null
-          navigation.navigate('LoginPage'); // Replace with your login screen route
-        }
-      });
-    
-      // Cleanup subscription on unmount
-      return () => unsubscribe();
-    }, []);
+  // Helper function for validation (admin or user)
+  const validateCredentials = () => {
+    if (role === 'admin') {
+      if (!email || !password) {
+        setErrorMessage('Please enter both email and password.');
+        return false;
+      }
+    } else if (role === 'user') {
+      if (!phoneNumber || !idNumber) {
+        setErrorMessage('Please enter both phone number and ID number.');
+        return false;
+      }
+    }
+    return true;
+  };
 
+  // Login handler
   const handleLogin = async () => {
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      navigation.navigate('TabLayout'); // Navigate to your desired screen after login
-      ToastAndroid.show("Welcome", ToastAndroid.LONG)
-    } catch (err) {
-      setError(err.message);
-    }
-  };
+    resetError();
 
-const handleSignup = async () => {
-    const auth = getAuth();
-    setLoading(true);
-    setError(""); 
-
-    if (email.trim() === "" || password.trim() === "") {
-      setError("Please enter your email and password.");
-      setLoading(false);
-      return;
-    }
+    if (!validateCredentials()) return;
 
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-
-      await addDoc(collection(db, "Users"), {
-        uid: user.uid,
-        email: user.email,
-        createdAt: new Date(), 
-      });
-
-      console.log("User signed up successfully:", user);
-
-    
-      dispatch(setLoggedIn(true));
-
-      
-      navigation.navigate("TabLayout"); 
+      if (role === 'admin') {
+        // Admin authentication using Firebase email/password
+        await signInWithEmailAndPassword(auth, email, password);
+        navigation.navigate('SubscriptionPage');
+      } else if (role === 'user') {
+        // Simple user validation (can be replaced with real authentication)
+        if (validateUserCredentials()) {
+          navigation.navigate('UserHomePage');
+        } else {
+          setErrorMessage('Invalid user credentials.');
+        }
+      }
     } catch (error) {
-      console.error("Error during signup: ", error);
-      setError(error.message); 
-    } finally {
-      setLoading(false);
+      setErrorMessage(error.message || 'Login failed. Please try again.');
     }
   };
-return (
+
+  // Simple validation for users (mock example)
+  const validateUserCredentials = () => {
+    return phoneNumber === '123456789' && idNumber === '12345';
+  };
+
+  // Redirect to signup page if the admin doesn't have an account
+  const handleSignupRedirect = () => {
+    navigation.navigate('SignupPage', { role });
+  };
+
+  return (
     <View style={styles.container}>
-      <Text style={styles.title}>STS CloudPOS</Text>
-      {error ? <Text style={styles.errorText}>{error}</Text> : null}
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        placeholderTextColor="#C4C4C4"
-        onChangeText={(text) => setEmail(text)} 
-        value={email}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        placeholderTextColor="#C4C4C4"
-        secureTextEntry
-        onChangeText={(text) => setPassword(text)}
-        value={password}
-      />
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        {loading ? (
-          <ActivityIndicator color="#00FF00" />
-        ) : (
-          <Text style={styles.buttonText}>Login</Text>
-        )}
-      </TouchableOpacity>
+      <Text style={styles.title}>{role === 'admin' ? 'Admin Login' : 'User Login'}</Text>
+      
+      {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
+
+      {role === 'admin' && (
+        <>
+          <TextInput
+            style={styles.input}
+            placeholder="Email"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
+        </>
+      )}
+
+      {role === 'user' && (
+        <>
+          <TextInput
+            style={styles.input}
+            placeholder="Phone Number"
+            value={phoneNumber}
+            onChangeText={setPhoneNumber}
+            keyboardType="phone-pad"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="ID Number"
+            value={idNumber}
+            onChangeText={setIdNumber}
+            keyboardType="numeric"
+          />
+        </>
+      )}
+
+      <Button title="Login" onPress={handleLogin} />
+
+      {role === 'admin' && (
+        <TouchableOpacity onPress={handleSignupRedirect} style={styles.signupLink}>
+          <Text style={styles.signupText}>Don't have an account? Sign Up</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
@@ -137,47 +123,31 @@ return (
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#FFFFFF",
-    width: screenWidth,
-    height: screenHeight,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
   },
   title: {
-    fontSize: 40,
-    color: "#00FF00",
-    marginBottom: 40,
-    fontFamily: "Poppins-ExtraBold",
+    fontSize: 24,
+    marginBottom: 20,
   },
   input: {
-    width: "80%",
-    height: 50,
-    borderColor: "#C4C4C4",
+    height: 40,
+    borderColor: '#ccc',
     borderWidth: 1,
-    borderRadius: 25,
-    paddingHorizontal: 20,
-    marginVertical: 10,
-    fontFamily: "Poppins-Regular",
+    marginBottom: 12,
+    paddingHorizontal: 10,
+    width: '100%',
   },
-  button: {
-    width: "80%",
-    height: 50,
-    backgroundColor: "#E0E0E0",
-    borderRadius: 25,
-    justifyContent: "center",
-    alignItems: "center",
+  error: {
+    color: 'red',
+    marginBottom: 10,
+  },
+  signupLink: {
     marginTop: 20,
   },
-  buttonText: {
-    color: "#000000",
-    fontSize: 18,
-    fontFamily: "Poppins-Medium",
-  },
-  errorText: {
-    color: "red",
-    marginBottom: 10,
-    textAlign: "center",
-    fontFamily: "Poppins-Regular",
+  signupText: {
+    color: '#0F084B',
   },
 });
 

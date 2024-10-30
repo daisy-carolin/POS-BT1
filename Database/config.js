@@ -1,27 +1,27 @@
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-import { getFirestore } from "firebase/firestore";
-import { getReactNativePersistence, initializeAuth } from "firebase/auth";
-import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage'
 
+import { initializeApp, getApps, getApp } from "firebase/app";
+import { getFirestore } from "firebase/firestore";
+import { getReactNativePersistence, initializeAuth, getAuth } from "firebase/auth";
+import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
+
+// Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyDpAX3quNzJbYb5uIr3_2-BKqOKS7gkpaA",
-  authDomain: "rwanda-air.firebaseapp.com",
-  projectId: "rwanda-air",
-  storageBucket: "rwanda-air.appspot.com",
-  messagingSenderId: "833250541422",
-  appId: "1:833250541422:web:b1818dc5422aeae350cb7f",
-  measurementId: "G-QM91ELCZ5D"
+  apiKey: "AIzaSyACH7NSF35pVN9JWbH9AlEZJX2cz-NCI7Y",
+  authDomain: "pos-bt.firebaseapp.com",
+  projectId: "pos-bt",
+  storageBucket: "pos-bt.appspot.com",
+  messagingSenderId: "475555559683",
+  appId: "1:475555559683:web:220dc5e05315b167cd9136",
+  measurementId: "G-SKXQQZW5SK"
 };
 
-// Initialize Firebase
+
 const app = initializeApp(firebaseConfig);
-export const firebaseApp = app;
+
 
 const db = getFirestore(app);
 const auth = initializeAuth(app, {
-  persistence: getReactNativePersistence(ReactNativeAsyncStorage)
-});
+  persistence: getReactNativePersistence(ReactNativeAsyncStorage),
+  });
 
-
-export { db, auth};
+  export{db,auth};

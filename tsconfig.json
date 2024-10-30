@@ -6,12 +6,15 @@
       "@/*": [
         "./*"
       ]
-    }
+    },
+    "allowJs": true,    // Enable JavaScript files
+    "checkJs": true     // Optional: Enable checking of JavaScript files
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts"
-, "hooks/useBluetooth.js"  ]
+    "expo-env.d.ts",
+    "hooks/useBluetooth.js"   // Now allowed because allowJs is true
+  ]
 }
